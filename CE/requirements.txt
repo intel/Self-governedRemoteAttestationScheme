@@ -1,0 +1,7 @@
+colorlog
+ecdsa
+grpcio
+numpy
+protobuf
+pycryptodomex
+toml

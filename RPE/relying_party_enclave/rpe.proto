@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package rpe;
+
+// ====== RpeService =======
+service RpeService {
+	rpc SendRPEVerificationInfo (RPEVerificationInfo) returns (Response) {}
+	rpc QueryRPEs (RequiredRPENumber) returns (Response) {}
+	rpc SendQuote (RpeIdAndQuote) returns (Response) {}
+	rpc QueryQuote (RpeId) returns (Response) {}
+	rpc SendVerificationResult (VerificationResult) returns (Response) {}
+	rpc QueryVerificationFinalResult (RpeIds) returns (Response) {}
+	rpc SendCEInfo (CEInfo) returns (Response) {}
+	rpc QueryCEsInfo (JobIds) returns (Response) {}
+}
+
+message Response {
+	int32 status = 1;
+	string content = 2;
+}
+
+// SendRPEVerificationInfo
+message RPEVerificationInfo {
+	string rpeVerificationInfo = 1;
+}
+
+// QueryRPEs
+message RequiredRPENumber {
+	int32 requiredRPENumber = 1;
+}
+
+// SendQuote
+message RpeIdAndQuote {
+	string rpeId = 1;
+	string base64EncodedQuote = 2;
+}
+
+// QueryQuote
+message RpeId {
+	string rpeId = 1;
+}
+
+// SendVerificationResult
+message VerificationResult {
+	string rpeId = 1;
+	string verificationResult = 2;
+}
+
+// QueryVerificationFinalResult
+message RpeIds {
+	string rpeIds = 1;
+}
+
+// SendCEInfo
+message CEInfo {
+	string jobId = 1;
+	string ceInfo = 2;
+}
+
+// QueryCEsInfo
+message JobIds {
+	string jobIds = 1;
+}

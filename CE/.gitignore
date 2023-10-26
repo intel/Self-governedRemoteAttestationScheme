@@ -1,0 +1,76 @@
+/build
+/install
+/obj-*
+
+
+# No editor backup files.
+*.sw*
+*.backup
+*.orig
+\#*#
+*~
+.vscode
+
+.lib
+*.i
+*.s
+*.e
+*.d
+pal.map
+
+# object file/libraries
+*.a
+*.o
+*.so
+*.so.*
+
+# python
+*.py[co]
+__pycache__
+.pytest_cache
+
+# sgx
+*.manifest
+*.manifest.sgx
+*.sig
+*.token
+*.cached
+.output.sgx_get_token.*
+.output.sgx_sign.*
+
+# gnu global
+GPATH
+GTAGS
+GSYMS
+GRTAGS
+
+# tags/etags
+tags
+TAGS
+
+# cscope
+cscope.*
+ncscope.*
+*cscope*
+
+# special
+customer_enclave/quote_verification/build
+
+customer_enclave/RATLS_Conn/OUTPUT
+customer_enclave/RATLS_Conn/client
+customer_enclave/RATLS_Conn/mbedtls
+customer_enclave/RATLS_Conn/server
+customer_enclave/RATLS_Conn/ssl/ca.*
+customer_enclave/RATLS_Conn/ssl/server.*
+customer_enclave/RATLS_Conn/*.manifest.sgx
+customer_enclave/RATLS_Conn/*.sig
+customer_enclave/RATLS_Conn/*.token
+customer_enclave/RATLS_Conn/*.cache
+customer_enclave/RATLS_Conn/.output.sgx_get_token.*
+customer_enclave/RATLS_Conn/.output.sgx_sign.*
+customer_enclave/RATLS_Conn/*.so
+customer_enclave/RATLS_Conn/*.manifest
+
+config.toml
+sgx_default_qcnl.conf
+venv

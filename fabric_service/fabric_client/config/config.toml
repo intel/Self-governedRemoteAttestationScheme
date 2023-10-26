@@ -1,0 +1,6 @@
+[grpc]
+port = "50051"
+
+[fabric]
+fabric_network_file = "config/network.json"
+channel_name = "mychannel"
