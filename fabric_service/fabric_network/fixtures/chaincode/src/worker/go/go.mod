@@ -14,5 +14,5 @@ require (
 	github.com/sykesm/zap-logfmt v0.0.4 // indirect
 	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
-	google.golang.org/grpc v1.49.0 // indirect
+	google.golang.org/grpc v1.56.3 // indirect
 )
