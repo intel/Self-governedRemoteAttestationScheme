@@ -1,0 +1,6 @@
+[rpe]
+rpe_id = "rpe-1"
+grpc_server_address = "0.0.0.0:50051"
+rpo_address = "0.0.0.0"
+rpo_port = "4433"
+rpe_port = "4455"

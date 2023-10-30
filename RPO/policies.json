@@ -1,0 +1,93 @@
+{
+    "session_id": "uuid",
+    "description": "This is an example for policies description.",
+    "rpe_info":{
+        "mrenclave": "f3062ca1a8031194558c54ed66528221eeeec6f50993508308aa9b96e070f51e",
+        "mrsigner": "36c5c5e997d4e3f2fca4cedc896e8e65b9ef7876ac2574fcb545814665c5040f",
+        "isv_prod_id": "0",
+        "isv_svn": "0"
+    },
+
+    "tcb": [
+        {
+            "id": "[a-zA-Z0-9_-]*, e.g. tcb-1",
+            "fmspc": "fmspc value 1",
+            "data": "base64 encoded collateral"
+        },
+        {
+            "id": "tcb-2",
+            "fmspc": "fmspc value 2",
+            "data": "base64 encoded collateral"
+        }
+    ],
+    "rpe": [
+        {
+            "id": "[a-zA-Z0-9_-]*, e.g. rpe-1",
+            "qeid_allowed": ["first qeid", "second qeid"],
+            "tcb_allowed": ["tcb-1", "tcb-2"] ,     
+            "signing_key_cert": "S-Key-cert-1"
+        },
+        {
+            "id": "rpe-2",
+            "qeid_allowed": ["third qeid", "efbac5bb8d8cd796a8379405e5e846e2"],
+            "tcb_allowed": ["tcb-2"],
+            "signing_key_cert": "S-Key-cert-2"
+        }
+    ], 
+    "ce": [
+        {
+            "id": "[a-zA-Z0-9_-]*, e.g. ce-1",
+            "mrenclave": "mrenclave value",
+            "mrsigner_allow_any": true,
+            "isvprodid_allow_any": true,
+            "isvsvn_allow_any": true
+        },
+        {
+            "id": "ce-2",
+            "mrenclave_allow_any": true,
+            "mrsigner": "mrsigner value",
+            "isvprodid": 42,
+            "isvsvn_minimum": 3
+        }
+    ],
+    "job": [
+        {
+            "id": "[a-zA-Z0-9_-]*, e.g. job-1",
+            "rpe": "rpe-1",
+            "ce": "ce-1",
+            "cust_qeid_allowed": ["first qeid"],
+            "tcb_allowed": ["tcb-1"]
+        },
+        {
+            "id": "job-2",
+            "rpe": "rpe-1",
+            "ce": "ce-2",
+            "cust_qeid_allowed": ["second qeid"],
+            "tcb_allowed": ["tcb-1"]
+        },
+        {
+            "id": "job-3",
+            "rpe": "rpe-2",
+            "ce": "ce-2",
+            "cust_qeid_allowed": ["third qeid"],
+            "tcb_allowed": ["tcb-1", "tcb-2"]
+        }
+    ],
+    "connection": [
+        {
+            "server": "job-2",
+            "clients": ["job-1"]
+        },
+        {
+            "server": "job-3",
+            "clients": ["job-1"]
+        },
+        {
+            "server": "job-1",
+            "clients_allow_any": true
+        }
+    ]
+}
+
+
+
