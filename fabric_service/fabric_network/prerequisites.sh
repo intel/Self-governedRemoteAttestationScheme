@@ -19,6 +19,13 @@ bin/cryptogen generate \
     --config fixtures/network/crypto-config.yaml \
     --output fixtures/network/crypto-config
 
+# Rename private key's name
+mv fixtures/network/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp/keystore/*_sk fixtures/network/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp/keystore/priv_sk
+mv fixtures/network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/*_sk fixtures/network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/priv_sk
+mv fixtures/network/crypto-config/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore/*_sk fixtures/network/crypto-config/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore/priv_sk
+mv fixtures/network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/*_sk fixtures/network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/priv_sk
+mv fixtures/network/crypto-config/peerOrganizations/org2.example.com/users/User1@org2.example.com/msp/keystore/*_sk fixtures/network/crypto-config/peerOrganizations/org2.example.com/users/User1@org2.example.com/msp/keystore/priv_sk
+
 # Generate genesis block file
 if [ ! -d fixtures/network/${CHANNEL_ARTIFACTS} ]; then
     mkdir fixtures/network/${CHANNEL_ARTIFACTS}

@@ -24,7 +24,7 @@
       "users": {
         "Admin": {
           "cert": "fixtures/network/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp/signcerts/Admin@example.com-cert.pem",
-          "private_key": "fixtures/network/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp/keystore/03fea8473ebffd0b1ba9e795108b40f22b074c3fb1a6ee46220916931949a112_sk"
+          "private_key": "fixtures/network/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp/keystore/priv_sk"
         }
       }
     },
@@ -40,11 +40,11 @@
       "users": {
         "Admin": {
           "cert": "fixtures/network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem",
-          "private_key": "fixtures/network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/d2f68badb848c16617678b63d3d7c8efd5328194b7be734f2dd959c2057696d6_sk"
+          "private_key": "fixtures/network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/priv_sk"
         },
         "User1": {
           "cert": "fixtures/network/crypto-config/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem",
-          "private_key": "fixtures/network/crypto-config/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore/d05f696c6bb6fc530af2869b6cef99b797e18ca92ba84f2648657a381b73621b_sk"
+          "private_key": "fixtures/network/crypto-config/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore/priv_sk"
         }
       }
     },
@@ -60,11 +60,11 @@
       "users": {
         "Admin": {
           "cert": "fixtures/network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem",
-          "private_key": "fixtures/network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/c364085bbfe83cd93f9fd52fcb12470a3f2f7f9d570771f6933699e337a69636_sk"
+          "private_key": "fixtures/network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/priv_sk"
         },
         "User1": {
           "cert": "fixtures/network/crypto-config/peerOrganizations/org2.example.com/users/User1@org2.example.com/msp/signcerts/User1@org2.example.com-cert.pem",
-          "private_key": "fixtures/network/crypto-config/peerOrganizations/org2.example.com/users/User1@org2.example.com/msp/keystore/ea0d746347b18ccd02bdf511c04e0257a50a0b1ea609a33e24f9a424370df0d0_sk"
+          "private_key": "fixtures/network/crypto-config/peerOrganizations/org2.example.com/users/User1@org2.example.com/msp/keystore/priv_sk"
         }
       }
     }
