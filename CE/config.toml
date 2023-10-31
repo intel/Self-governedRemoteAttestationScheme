@@ -1,0 +1,4 @@
+[ce]
+local_ce = "ce-1"
+rpe_address = "0.0.0.0"
+rpe_port = "4455"
