@@ -1,5 +1,6 @@
 [rpo]
 rpe_id = "rpe-1"
 policies_path = "policies.json"
+evidence_path = "evidence"
 private_key_path = "private-signing-key.pem"
 port = "4433"

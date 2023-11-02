@@ -25,13 +25,13 @@
             "id": "[a-zA-Z0-9_-]*, e.g. rpe-1",
             "qeid_allowed": ["first qeid", "second qeid"],
             "tcb_allowed": ["tcb-1", "tcb-2"] ,     
-            "signing_key_cert": "S-Key-cert-1"
+            "ca_signing_key_cert": "S-Key-cert-1"
         },
         {
             "id": "rpe-2",
             "qeid_allowed": ["third qeid", "efbac5bb8d8cd796a8379405e5e846e2"],
             "tcb_allowed": ["tcb-2"],
-            "signing_key_cert": "S-Key-cert-2"
+            "ca_signing_key_cert": "S-Key-cert-2"
         }
     ], 
     "ce": [
@@ -75,14 +75,17 @@
     ],
     "connection": [
         {
+            "id": "[a-zA-Z0-9_-]*, e.g. job-1",
             "server": "job-2",
             "clients": ["job-1"]
         },
         {
+            "id": "connection-2",
             "server": "job-3",
             "clients": ["job-1"]
         },
         {
+            "id": "connection-3",
             "server": "job-1",
             "clients_allow_any": true
         }
