@@ -24,7 +24,7 @@ function clean()
 
 function echo_help()
 {
-    echo "Usage: startup.sh [start|help]"
+    echo "Usage: startup.sh [start|build|clean|help]"
 }
 
 if [ $# != 1 ]; then
@@ -35,7 +35,7 @@ fi
 case $1 in
     start) start
             ;;
-    stop)  echo_help
+    help)  echo_help
             ;;
     build) build
             ;;

@@ -44,7 +44,7 @@ start_network
 
 function echo_help()
 {
-    echo "$0 [build|start|stop|restart]"
+    echo "$0 [build|start|restart|clean|stop|help]"
 }
 
 function clean_network()
@@ -68,7 +68,9 @@ case $1 in
             ;;
     clean) clean_network
             ;;
-    *)    echo_help
+    help)  echo_help
+            ;;
+    *)     echo_help
             ;;
 esac
 

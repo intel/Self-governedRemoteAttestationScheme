@@ -22,7 +22,7 @@ set the enclave load policy as persistent:succeed!
 
 - Get collaterals
 ```
-$ cd Tool-Collateral
+$ cd RPO/tool-collateral/
 $ make
 $ cp
 ~/SGXDataCenterAttestationPrimitives/SampleCode/QuoteGenerationSample/
