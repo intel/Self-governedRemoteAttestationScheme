@@ -60,9 +60,10 @@ ncscope.*
 *.srl
 *.csr
 *.key
+*.dat
 venv/
 bin/
 crypto-config/
 channel-artifacts/
+collaterals/
 evidence
-collaterals
