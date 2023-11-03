@@ -24,7 +24,7 @@ function clean()
 
 function echo_help()
 {
-    echo "Usage: ce.sh [start|build|help]"
+    echo "Usage: ce.sh [start|build|clean|help]"
 }
 
 if [[ $# != 1 ]]; then
@@ -39,7 +39,7 @@ case $1 in
             ;;
     clean) clean
             ;;
-    stop)  echo_help
+    help)  echo_help
             ;;
     *)    echo_help
             ;;

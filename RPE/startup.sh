@@ -32,7 +32,7 @@ function clean()
 
 function echo_help()
 {
-    echo "Usage: rpe.sh [start|build|help]"
+    echo "Usage: rpe.sh [start|build|clean|help]"
 }
 
 if [ $# != 1 ]; then
@@ -45,7 +45,7 @@ case $1 in
             ;;
     start) start
             ;;
-    stop)  echo_help
+    help)  echo_help
             ;;
     clean) clean
             ;;
