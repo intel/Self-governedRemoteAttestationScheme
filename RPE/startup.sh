@@ -27,6 +27,8 @@ function clean()
 {
     make clean
     rm -rf relying_party_enclave/quote_verification/build/
+    rm relying_party_enclave/quote_verification/*.so
+    rm relying_party_enclave/quote_verification/*.cxx
     rm relying_party_enclave/keys_generation/generate_key_pair.so
 }
 

@@ -268,7 +268,10 @@ func (t *WorkerRegistry) workerLookUpNext(stub shim.ChaincodeStubInterface, args
 	var resparam WorkerLookUpResParam
 	resparam.IDs = []string{}
 	for iter.HasNext() {
-		item, _ := iter.Next()
+		item, err := iter.Next()
+		if err != nil {
+			return shim.Error(err.Error())
+		}
 		logger.Infof("The value: %v", item)
 		resparam.IDs = append(resparam.IDs, string(item.Value))
 		if len(resparam.IDs) == PAGESIZE {

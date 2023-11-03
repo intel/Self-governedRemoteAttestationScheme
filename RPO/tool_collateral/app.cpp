@@ -163,7 +163,7 @@ int main() {
 
     printf("Info: ECDSA quote path: %s\n", quote_path);
 
-    get_collateral(quote);
+    get_collateral(std::move(quote));
 
     printf("\n");
 

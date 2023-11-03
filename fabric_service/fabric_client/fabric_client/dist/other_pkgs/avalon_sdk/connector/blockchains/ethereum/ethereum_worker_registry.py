@@ -179,7 +179,7 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                 logging.error("Invalid organization id {}".format(org_id))
                 return None
             if not is_valid_hex_of_length(application_id, 64):
-                logging.error("Invalid application id {}".format(org_id))
+                logging.error("Invalid application id {}".format(application_id))
                 return None
             lookup_result = self.__contract_instance.functions\
                 .workerLookUpNext(
