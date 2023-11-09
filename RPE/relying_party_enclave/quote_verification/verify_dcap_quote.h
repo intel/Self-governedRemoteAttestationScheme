@@ -15,3 +15,4 @@ int tdx_verify_quote_body(const sgx_quote4_t* p_quote, const char* mr_td,
                       const char* mr_signer, const char* report_data, const char* qeid);
 uint8_t* parseCollateral(std::string base64_encoded_collateral);
 void freeCollateral(uint8_t* p_quote_collateral);
+int base64Decode(const char* input, unsigned char* output, int size);

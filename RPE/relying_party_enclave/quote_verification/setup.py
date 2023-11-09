@@ -1,9 +1,8 @@
 from distutils.core import setup, Extension
 
 verify_dcap_quote_module = Extension('_verify_dcap_quote',
-                           sources=['verify_dcap_quote_wrap.cxx', 'verify_dcap_quote.cpp', 'types.cpp',
-                                    'hex_string.cpp', 'base64.cpp', 'json/json_utils.cpp', 'json/parson.cpp'],
-                           libraries=['sgx_dcap_quoteverify']
+                           sources=['verify_dcap_quote_wrap.cxx', 'verify_dcap_quote.cpp', 'base64.cpp', 'hex_string.cpp'],
+                           libraries=['sgx_dcap_quoteverify', 'jansson']
                            )
 
 setup(name='verify_dcap_quote',

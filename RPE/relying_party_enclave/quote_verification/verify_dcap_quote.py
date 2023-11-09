@@ -147,4 +147,7 @@ def parseCollateral(base64_encoded_collateral):
 def freeCollateral(p_quote_collateral):
     return _verify_dcap_quote.freeCollateral(p_quote_collateral)
 
+def base64Decode(input, output, size):
+    return _verify_dcap_quote.base64Decode(input, output, size)
+
 
