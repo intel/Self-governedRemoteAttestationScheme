@@ -11,6 +11,10 @@ version: '2'
 services:
   orderer-base:
     image: hyperledger/fabric-orderer:${HLF_VERSION}
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - NET_RAW
     environment:
       - ORDERER_GENERAL_LOGLEVEL=DEBUG
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0

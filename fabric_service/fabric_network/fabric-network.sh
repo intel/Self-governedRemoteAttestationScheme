@@ -49,6 +49,8 @@ function echo_help()
 
 function clean_network()
 {
+    docker rm $(docker ps -aq)
+    docker rmi $(docker images -q 'dev-peer*:*latest')
     rm -rf venv/
 }
 

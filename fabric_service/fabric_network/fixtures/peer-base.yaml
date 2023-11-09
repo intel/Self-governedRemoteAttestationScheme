@@ -11,6 +11,10 @@ version: '2'
 services:
   peer-base:
     image: hyperledger/fabric-peer:${HLF_VERSION}
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - NET_RAW
     environment:
       - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:1.4.6
       - GODEBUG=netdns=go+1
