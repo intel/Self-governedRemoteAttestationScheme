@@ -184,14 +184,6 @@ int ra_tls_verify_callback(void* data, mbedtls_x509_crt* crt, int depth, uint32_
         memcpy(tcbId, ids[selected_i], strlen(ids[selected_i]) + 1);
         tcb_id = tcbId;
     }
-
-    // Free collaterals and ids
-    for(int i = 0;i < collateral_num;++i) {
-        freeCollateral(p_quote_collaterals[i]);
-        free(ids[i]);
-    }
-    free(p_quote_collaterals);
-    free(ids);
     
     if (ret) {
         ERROR("sgx_qv_verify_quote failed: %d\n", ret);
@@ -253,7 +245,48 @@ int ra_tls_verify_callback(void* data, mbedtls_x509_crt* crt, int depth, uint32_
 
     // ret = 0;
 out:
-    free(supplemental_data);
+    // Free collaterals and ids
+    if (p_quote_collaterals) {
+        for(int i = 0;i < collateral_num;++i) {
+            if (p_quote_collaterals[i]) {
+                sgx_ql_qve_collateral_t* p_quote_collateral = (sgx_ql_qve_collateral_t*)p_quote_collaterals[i];
+                if (p_quote_collateral->pck_crl_issuer_chain) {
+                    free(p_quote_collateral->pck_crl_issuer_chain);
+                }
+                if (p_quote_collateral->pck_crl) {
+                    free(p_quote_collateral->pck_crl);
+                }
+                if (p_quote_collateral->qe_identity) {
+                    free(p_quote_collateral->qe_identity);
+                }
+                if (p_quote_collateral->qe_identity_issuer_chain) {
+                    free(p_quote_collateral->qe_identity_issuer_chain);
+                }
+                if (p_quote_collateral->root_ca_crl) {
+                    free(p_quote_collateral->root_ca_crl);
+                }
+                if (p_quote_collateral->tcb_info) {
+                    free(p_quote_collateral->tcb_info);
+                }
+                if (p_quote_collateral->tcb_info_issuer_chain) {
+                    free(p_quote_collateral->tcb_info_issuer_chain);
+                }
+                freeCollateral(p_quote_collaterals[i]);
+            }
+        }
+        free(p_quote_collaterals);
+    }
+    if (ids) {
+        for(int i = 0;i < collateral_num;++i) {
+            if (ids[i]) {
+                free(ids[i]);
+            }
+        }
+        free(ids);
+    }
+    if (supplemental_data) {
+        free(supplemental_data);
+    }
     return ret;
 }
 
@@ -266,14 +299,35 @@ bool parseCollateral(const char* base64_encoded_collateral, uint8_t*** pp_quote_
         return false;
     }
     *p_collateral_num = collateral_num;
+
     *pp_quote_collaterals = (uint8_t**)malloc(collateral_num * sizeof(uint8_t*));
+    if (*pp_quote_collaterals == NULL) {
+        printf("Allocate p_quote_collaterals failed\n");
+        return false;
+    }
     uint8_t** p_quote_collaterals = *pp_quote_collaterals;
+    for (int i = 0;i < collateral_num;++i) {
+        p_quote_collaterals[i] = NULL;
+    }
+
     *p_ids = (char**)malloc(collateral_num * sizeof(char*));
+    if (*p_ids == NULL) {
+        printf("Allocate ids failed\n");
+        return false;
+    }
     char** ids = *p_ids;
+    for (int i = 0;i < collateral_num;++i) {
+        ids[i] = NULL;
+    }
+
     void* iter = json_object_iter(collaterals_object);
     for (int i = 0;i < collateral_num;++i) {
         const char* tcbId = json_object_iter_key(iter);
         ids[i] = (char*)malloc(strlen(tcbId) + 1);
+        if (ids[i] == NULL) {
+            printf("Allocate ids %d failed\n", i);
+            return false;
+        }
         memcpy(ids[i], tcbId, strlen(tcbId) + 1);
         json_t* collateral_object = json_object_iter_value(iter);
         uint32_t collateral_size = json_integer_value(json_object_get(collateral_object, "collateral_size"));
@@ -306,48 +360,91 @@ bool parseCollateral(const char* base64_encoded_collateral, uint8_t*** pp_quote_
         sgx_ql_qve_collateral_t* p_quote_collateral_struct = (sgx_ql_qve_collateral_t*)malloc(sizeof(sgx_ql_qve_collateral_t));
         if (p_quote_collateral_struct == NULL) {
             printf("Allocate p_quote_collateral_struct failed\n");
-            return NULL;
+            return false;
         }
+        p_quote_collateral_struct->pck_crl = NULL;
+        p_quote_collateral_struct->pck_crl_issuer_chain = NULL;
+        p_quote_collateral_struct->qe_identity = NULL;
+        p_quote_collateral_struct->qe_identity_issuer_chain = NULL;
+        p_quote_collateral_struct->root_ca_crl = NULL;
+        p_quote_collateral_struct->tcb_info = NULL;
+        p_quote_collateral_struct->tcb_info_issuer_chain = NULL;
+
         p_quote_collateral_struct->version = version;
         p_quote_collateral_struct->tee_type = tee_type;
         // printf("Assign version and type finished\n");
         char* pck_crl_issuer_chain_buffer = (char*)malloc(pck_crl_issuer_chain_size);
+        if (pck_crl_issuer_chain_buffer == NULL) {
+            printf("Allocate pck_crl_issuer_chain_buffer failed\n");
+            p_quote_collaterals[i] = (uint8_t*)(p_quote_collateral_struct);
+            return false;
+        }
         base64Decode(pck_crl_issuer_chain_base64, pck_crl_issuer_chain_buffer, pck_crl_issuer_chain_size);
         p_quote_collateral_struct->pck_crl_issuer_chain = pck_crl_issuer_chain_buffer;
         // printf("Assign pck_crl_issuer_chain finished\n");
         p_quote_collateral_struct->pck_crl_issuer_chain_size = pck_crl_issuer_chain_size;
 
         char* root_ca_crl_buffer = (char*)malloc(root_ca_crl_size);
+        if (root_ca_crl_buffer == NULL) {
+            printf("Allocate root_ca_crl_buffer failed\n");
+            p_quote_collaterals[i] = (uint8_t*)(p_quote_collateral_struct);
+            return false;
+        }
         base64Decode(root_ca_crl_base64, root_ca_crl_buffer, root_ca_crl_size);
         p_quote_collateral_struct->root_ca_crl = root_ca_crl_buffer;
         // printf("Assign root_ca_crl finished\n");
         p_quote_collateral_struct->root_ca_crl_size = root_ca_crl_size;
 
         char* pck_crl_buffer = (char*)malloc(pck_crl_size);
+        if (pck_crl_buffer == NULL) {
+            printf("Allocate pck_crl_buffer failed\n");
+            p_quote_collaterals[i] = (uint8_t*)(p_quote_collateral_struct);
+            return false;
+        }
         base64Decode(pck_crl_base64, pck_crl_buffer, pck_crl_size);
         p_quote_collateral_struct->pck_crl = pck_crl_buffer;
         // printf("Assign pck_crl finished\n");
         p_quote_collateral_struct->pck_crl_size = pck_crl_size;
         
         char* tcb_info_issuer_chain_buffer = (char*)malloc(tcb_info_issuer_chain_size);
+        if (tcb_info_issuer_chain_buffer == NULL) {
+            printf("Allocate tcb_info_issuer_chain_buffer failed\n");
+            p_quote_collaterals[i] = (uint8_t*)(p_quote_collateral_struct);
+            return false;
+        }
         base64Decode(tcb_info_issuer_chain_base64, tcb_info_issuer_chain_buffer, tcb_info_issuer_chain_size);
         p_quote_collateral_struct->tcb_info_issuer_chain = tcb_info_issuer_chain_buffer;
         // printf("Assign tcb_info_issuer_chain finished\n");
         p_quote_collateral_struct->tcb_info_issuer_chain_size = tcb_info_issuer_chain_size;
         
         char* tcb_info_buffer = (char*)malloc(tcb_info_size);
+        if (tcb_info_buffer == NULL) {
+            printf("Allocate tcb_info_buffer failed\n");
+            p_quote_collaterals[i] = (uint8_t*)(p_quote_collateral_struct);
+            return false;
+        }
         base64Decode(tcb_info_base64, tcb_info_buffer, tcb_info_size);
         p_quote_collateral_struct->tcb_info = tcb_info_buffer;
         // printf("Assign tcb_info finished\n");
         p_quote_collateral_struct->tcb_info_size = tcb_info_size;
         
         char* qe_identity_issuer_chain_buffer = (char*)malloc(qe_identity_issuer_chain_size);
+        if (qe_identity_issuer_chain_buffer == NULL) {
+            printf("Allocate qe_identity_issuer_chain_buffer failed\n");
+            p_quote_collaterals[i] = (uint8_t*)(p_quote_collateral_struct);
+            return false;
+        }
         base64Decode(qe_identity_issuer_chain_base64, qe_identity_issuer_chain_buffer, qe_identity_issuer_chain_size);
         p_quote_collateral_struct->qe_identity_issuer_chain = qe_identity_issuer_chain_buffer;
         // printf("Assign qe_identity_issuer_chain finished\n");
         p_quote_collateral_struct->qe_identity_issuer_chain_size = qe_identity_issuer_chain_size;
 
         char* qe_identity_buffer = (char*)malloc(qe_identity_size);
+        if (qe_identity_buffer == NULL) {
+            printf("Allocate qe_identity_buffer failed\n");
+            p_quote_collaterals[i] = (uint8_t*)(p_quote_collateral_struct);
+            return false;
+        }
         base64Decode(qe_identity_base64, qe_identity_buffer, qe_identity_size);
         p_quote_collateral_struct->qe_identity = qe_identity_buffer;
         // printf("Assign qe_identity finished\n");

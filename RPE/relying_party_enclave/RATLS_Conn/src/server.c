@@ -47,12 +47,12 @@ char *tcb_id = NULL;
 static char signing_key_buf[375];
 static char encryption_keys_buf[651];
 
-/* RA-TLS: on client, only need to register ra_tls_verify_callback_der() for cert verification */
-int (*ra_tls_verify_callback_der_f)(uint8_t* der_crt, size_t der_crt_size);
+// /* RA-TLS: on client, only need to register ra_tls_verify_callback_der() for cert verification */
+// int (*ra_tls_verify_callback_der_f)(uint8_t* der_crt, size_t der_crt_size);
 
-/* RA-TLS: if specified in command-line options, use our own callback to verify SGX measurements */
-void (*ra_tls_set_measurement_callback_f)(int (*f_cb)(const char* mrenclave, const char* mrsigner,
-                                          const char* isv_prod_id, const char* isv_svn));
+// /* RA-TLS: if specified in command-line options, use our own callback to verify SGX measurements */
+// void (*ra_tls_set_measurement_callback_f)(int (*f_cb)(const char* mrenclave, const char* mrsigner,
+//                                           const char* isv_prod_id, const char* isv_svn));
 
 /* RA-TLS: on server, only need ra_tls_create_key_and_crt_der() to create keypair and X.509 cert */
 int (*ra_tls_create_key_and_crt_der_f)(uint8_t** der_key, size_t* der_key_size, uint8_t** der_crt,
@@ -181,10 +181,27 @@ static int set_CE_measurements(const char* mrenclave, const char* mrsigner,
                                    const char* isv_prod_id, const char* isv_svn){
     assert(mrenclave && mrsigner && isv_prod_id && isv_svn);
 
-    strcpy(ce_mrenclave, mrenclave);
-    strcpy(ce_mrsigner,mrsigner);
-    strcpy(ce_isv_prod_id,isv_prod_id);
-    strcpy(ce_isv_svn,isv_svn);
+    if (sizeof(ce_mrenclave) - 1 < strlen(mrenclave)) {
+        mbedtls_printf("\n length of ce_mrenclave is less than mrenclave");
+        return -1;
+    }
+    if (sizeof(ce_mrsigner) - 1 < strlen(mrsigner)) {
+        mbedtls_printf("\n length of ce_mrsigner is less than mrsigner");
+        return -1;
+    }
+    if (sizeof(ce_isv_prod_id) - 1 < strlen(isv_prod_id)) {
+        mbedtls_printf("\n length of ce_isv_prod_id is less than isv_prod_id");
+        return -1;
+    }
+    if (sizeof(ce_isv_svn) - 1 < strlen(isv_svn)) {
+        mbedtls_printf("\n length of ce_isv_svn is less than isv_svn");
+        return -1;
+    }
+
+    strncpy(ce_mrenclave, mrenclave, sizeof(ce_mrenclave) - 1);
+    strncpy(ce_mrsigner,mrsigner, sizeof(ce_mrsigner) - 1);
+    strncpy(ce_isv_prod_id,isv_prod_id,sizeof(ce_isv_prod_id) - 1);
+    strncpy(ce_isv_svn,isv_svn, sizeof(ce_isv_svn) - 1);
 
     // TODO: verify RPE measurement
 //     if (memcmp(mrenclave, rpe_mrenclave, sizeof(rpe_mrenclave)))
@@ -244,6 +261,7 @@ static int my_verify_callback(void* data, mbedtls_x509_crt* crt, int depth, uint
                                        (const char*)&quote->report_body.mr_signer,
                                        (const char*)&quote->report_body.isv_prod_id,
                                        (const char*)&quote->report_body.isv_svn);
+    return ret;
 }
 
 
@@ -282,57 +300,57 @@ static bool getenv_client_inside_sgx() {
     return !strcmp(str, "1") || !strcmp(str, "true") || !strcmp(str, "TRUE");
 }
 
-int ra_verify_init(){
-    char* error;
-    void* ra_tls_verify_lib           = NULL;
-    ra_tls_verify_callback_der_f      = NULL;
-    ra_tls_set_measurement_callback_f = NULL;
-    bool in_sgx = getenv_client_inside_sgx();
+// int ra_verify_init(){
+//     char* error;
+//     void* ra_tls_verify_lib           = NULL;
+//     ra_tls_verify_callback_der_f      = NULL;
+//     ra_tls_set_measurement_callback_f = NULL;
+//     bool in_sgx = getenv_client_inside_sgx();
 
-    if (in_sgx) {
-        /*
-        * RA-TLS verification with DCAP inside SGX enclave uses dummies instead of real
-        * functions from libsgx_urts.so, thus we don't need to load this helper library.
-        */
-        ra_tls_verify_lib = dlopen("libra_tls_verify_dcap_gramine.so", RTLD_LAZY);
-        if (!ra_tls_verify_lib) {
-            mbedtls_printf("%s\n", dlerror());
-            mbedtls_printf("User requested RA-TLS verification with DCAP inside SGX but cannot find lib\n");
-            mbedtls_printf("Please make sure that you are using client_dcap.manifest\n");
-            return 1;
-        }
-    } else {
-        void* helper_sgx_urts_lib = dlopen("libsgx_urts.so", RTLD_NOW | RTLD_GLOBAL);
-        if (!helper_sgx_urts_lib) {
-            mbedtls_printf("%s\n", dlerror());
-            mbedtls_printf("User requested RA-TLS verification with DCAP but cannot find helper"
-                            " libsgx_urts.so lib\n");
-            return 1;
-        }
+//     if (in_sgx) {
+//         /*
+//         * RA-TLS verification with DCAP inside SGX enclave uses dummies instead of real
+//         * functions from libsgx_urts.so, thus we don't need to load this helper library.
+//         */
+//         ra_tls_verify_lib = dlopen("libra_tls_verify_dcap_gramine.so", RTLD_LAZY);
+//         if (!ra_tls_verify_lib) {
+//             mbedtls_printf("%s\n", dlerror());
+//             mbedtls_printf("User requested RA-TLS verification with DCAP inside SGX but cannot find lib\n");
+//             mbedtls_printf("Please make sure that you are using client_dcap.manifest\n");
+//             return 1;
+//         }
+//     } else {
+//         void* helper_sgx_urts_lib = dlopen("libsgx_urts.so", RTLD_NOW | RTLD_GLOBAL);
+//         if (!helper_sgx_urts_lib) {
+//             mbedtls_printf("%s\n", dlerror());
+//             mbedtls_printf("User requested RA-TLS verification with DCAP but cannot find helper"
+//                             " libsgx_urts.so lib\n");
+//             return 1;
+//         }
 
-        ra_tls_verify_lib = dlopen("libra_tls_verify_dcap.so", RTLD_LAZY);
-        if (!ra_tls_verify_lib) {
-            mbedtls_printf("%s\n", dlerror());
-            mbedtls_printf("User requested RA-TLS verification with DCAP but cannot find lib\n");
-            return 1;
-        }
-    }
+//         ra_tls_verify_lib = dlopen("libra_tls_verify_dcap.so", RTLD_LAZY);
+//         if (!ra_tls_verify_lib) {
+//             mbedtls_printf("%s\n", dlerror());
+//             mbedtls_printf("User requested RA-TLS verification with DCAP but cannot find lib\n");
+//             return 1;
+//         }
+//     }
 
-    ra_tls_verify_callback_der_f = dlsym(ra_tls_verify_lib, "ra_tls_verify_callback_der");
-    if ((error = dlerror()) != NULL) {
-        mbedtls_printf("%s\n", error);
-        return 1;
-    }
-    ra_tls_set_measurement_callback_f = dlsym(ra_tls_verify_lib, "ra_tls_set_measurement_callback");
-    if ((error = dlerror()) != NULL) {
-        mbedtls_printf("%s\n", error);
-        return 1;
-    }
+//     ra_tls_verify_callback_der_f = dlsym(ra_tls_verify_lib, "ra_tls_verify_callback_der");
+//     if ((error = dlerror()) != NULL) {
+//         mbedtls_printf("%s\n", error);
+//         return 1;
+//     }
+//     ra_tls_set_measurement_callback_f = dlsym(ra_tls_verify_lib, "ra_tls_set_measurement_callback");
+//     if ((error = dlerror()) != NULL) {
+//         mbedtls_printf("%s\n", error);
+//         return 1;
+//     }
 
-    (*ra_tls_set_measurement_callback_f)(set_CE_measurements);
+//     (*ra_tls_set_measurement_callback_f)(set_CE_measurements);
 
-    return 0;
-}
+//     return 0;
+// }
 
 
 void* ra_tls_attest_lib;
@@ -786,17 +804,20 @@ int pass_data(const char* data){
     while ((ret = mbedtls_ssl_write(&ssl, (unsigned char *)buffer, len)) <= 0) {
         if (ret == MBEDTLS_ERR_NET_CONN_RESET) {
             mbedtls_printf(" failed\n  ! peer closed the connection\n\n");
+            free(buffer);
             goto reset;
         }
 
         if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE) {
             mbedtls_printf(" failed\n  ! mbedtls_ssl_write returned %d\n\n", ret);
+            free(buffer);
             goto exit;
         }
     }
 
     len = ret;
     mbedtls_printf(" %lu bytes written\n\n%s\n", len, buffer);
+    free(buffer);
 
     mbedtls_printf("  . Closing the connection...");
 
@@ -821,7 +842,6 @@ reset:
         mbedtls_printf("Last error was: %d - %s\n\n", ret, error_buf);
     }
 #endif
-    free(buffer);
     mbedtls_net_free(&client_fd);
 
     mbedtls_ssl_session_reset(&ssl);

@@ -45,12 +45,12 @@ char hexqeid[40];
 static char signing_key_buf[375];
 static char encryption_keys_buf[651];
 
-/* RA-TLS: on client, only need to register ra_tls_verify_callback_der() for cert verification */
-int (*ra_tls_verify_callback_der_f)(uint8_t* der_crt, size_t der_crt_size);
+// /* RA-TLS: on client, only need to register ra_tls_verify_callback_der() for cert verification */
+// int (*ra_tls_verify_callback_der_f)(uint8_t* der_crt, size_t der_crt_size);
 
 // /* RA-TLS: if specified in command-line options, use our own callback to verify SGX measurements */
-void (*ra_tls_set_measurement_callback_f)(int (*f_cb)(const char* mrenclave, const char* mrsigner,
-                                          const char* isv_prod_id, const char* isv_svn));
+// void (*ra_tls_set_measurement_callback_f)(int (*f_cb)(const char* mrenclave, const char* mrsigner,
+//                                           const char* isv_prod_id, const char* isv_svn));
 
 
 /* RA-TLS: on server, only need ra_tls_create_key_and_crt_der() to create keypair and X.509 cert */
@@ -182,13 +182,25 @@ void hex_measurements(char* dest, const char* src){
     }
 }
 
-static int verify_RPE_qeid(){
+static int verify_RPE_qeid() {
+    if (rpe_qeids == NULL) {
+        mbedtls_printf("verify_RPE_qeid failed !: rpe_qeids is NULL\n");
+        return -1;
+    }
     char *token; 
-    char *s = strdup(rpe_qeids);  
-    for(token = strsep(&s, " "); token != NULL; token = strsep(&s, " ")){  
-        if(strcmp(hexqeid, token)==0)
+    char *s = strdup(rpe_qeids);
+    if (s == NULL) {
+        mbedtls_printf("verify_RPE_qeid failed !: strdup for rpe_qeids error\n");
+        free(s);
+        return -1;
+    }
+    for (token = strsep(&s, " "); token != NULL; token = strsep(&s, " ")){  
+        if(strcmp(hexqeid, token)==0) {
+            free(s);
             return 1;
-    }  
+        }
+    }
+    free(s);
     return -1;
 }
 
@@ -315,57 +327,57 @@ static bool getenv_client_inside_sgx() {
     return !strcmp(str, "1") || !strcmp(str, "true") || !strcmp(str, "TRUE");
 }
 
-int ra_verify_init(){
-    char* error;
-    void* ra_tls_verify_lib           = NULL;
-    ra_tls_verify_callback_der_f      = NULL;
-    ra_tls_set_measurement_callback_f = NULL;
-    bool in_sgx = getenv_client_inside_sgx();
+// int ra_verify_init(){
+//     char* error;
+//     void* ra_tls_verify_lib           = NULL;
+//     ra_tls_verify_callback_der_f      = NULL;
+//     ra_tls_set_measurement_callback_f = NULL;
+//     bool in_sgx = getenv_client_inside_sgx();
 
-    if (in_sgx) {
-        /*
-        * RA-TLS verification with DCAP inside SGX enclave uses dummies instead of real
-        * functions from libsgx_urts.so, thus we don't need to load this helper library.
-        */
-        ra_tls_verify_lib = dlopen("libra_tls_verify_dcap_gramine.so", RTLD_LAZY);
-        if (!ra_tls_verify_lib) {
-            mbedtls_printf("%s\n", dlerror());
-            mbedtls_printf("User requested RA-TLS verification with DCAP inside SGX but cannot find lib\n");
-            mbedtls_printf("Please make sure that you are using client_dcap.manifest\n");
-            return 1;
-        }
-    } else {
-        void* helper_sgx_urts_lib = dlopen("libsgx_urts.so", RTLD_NOW | RTLD_GLOBAL);
-        if (!helper_sgx_urts_lib) {
-            mbedtls_printf("%s\n", dlerror());
-            mbedtls_printf("User requested RA-TLS verification with DCAP but cannot find helper"
-                            " libsgx_urts.so lib\n");
-            return 1;
-        }
+//     if (in_sgx) {
+//         /*
+//         * RA-TLS verification with DCAP inside SGX enclave uses dummies instead of real
+//         * functions from libsgx_urts.so, thus we don't need to load this helper library.
+//         */
+//         ra_tls_verify_lib = dlopen("libra_tls_verify_dcap_gramine.so", RTLD_LAZY);
+//         if (!ra_tls_verify_lib) {
+//             mbedtls_printf("%s\n", dlerror());
+//             mbedtls_printf("User requested RA-TLS verification with DCAP inside SGX but cannot find lib\n");
+//             mbedtls_printf("Please make sure that you are using client_dcap.manifest\n");
+//             return 1;
+//         }
+//     } else {
+//         void* helper_sgx_urts_lib = dlopen("libsgx_urts.so", RTLD_NOW | RTLD_GLOBAL);
+//         if (!helper_sgx_urts_lib) {
+//             mbedtls_printf("%s\n", dlerror());
+//             mbedtls_printf("User requested RA-TLS verification with DCAP but cannot find helper"
+//                             " libsgx_urts.so lib\n");
+//             return 1;
+//         }
 
-        ra_tls_verify_lib = dlopen("libra_tls_verify_dcap.so", RTLD_LAZY);
-        if (!ra_tls_verify_lib) {
-            mbedtls_printf("%s\n", dlerror());
-            mbedtls_printf("User requested RA-TLS verification with DCAP but cannot find lib\n");
-            return 1;
-        }
-    }
+//         ra_tls_verify_lib = dlopen("libra_tls_verify_dcap.so", RTLD_LAZY);
+//         if (!ra_tls_verify_lib) {
+//             mbedtls_printf("%s\n", dlerror());
+//             mbedtls_printf("User requested RA-TLS verification with DCAP but cannot find lib\n");
+//             return 1;
+//         }
+//     }
 
-    ra_tls_verify_callback_der_f = dlsym(ra_tls_verify_lib, "ra_tls_verify_callback_der");
-    if ((error = dlerror()) != NULL) {
-        mbedtls_printf("%s\n", error);
-        return 1;
-    }
-    ra_tls_set_measurement_callback_f = dlsym(ra_tls_verify_lib, "ra_tls_set_measurement_callback");
-    if ((error = dlerror()) != NULL) {
-        mbedtls_printf("%s\n", error);
-        return 1;
-    }
+//     ra_tls_verify_callback_der_f = dlsym(ra_tls_verify_lib, "ra_tls_verify_callback_der");
+//     if ((error = dlerror()) != NULL) {
+//         mbedtls_printf("%s\n", error);
+//         return 1;
+//     }
+//     ra_tls_set_measurement_callback_f = dlsym(ra_tls_verify_lib, "ra_tls_set_measurement_callback");
+//     if ((error = dlerror()) != NULL) {
+//         mbedtls_printf("%s\n", error);
+//         return 1;
+//     }
 
-    (*ra_tls_set_measurement_callback_f)(verify_RPE_measurements);
+//     (*ra_tls_set_measurement_callback_f)(verify_RPE_measurements);
 
-    return 0;
-}
+//     return 0;
+// }
 
 
 void* ra_tls_attest_lib;
@@ -398,7 +410,7 @@ int ra_tls_server_init(const char * port) {
     mbedtls_entropy_init(&entropy);
     mbedtls_ctr_drbg_init(&ctr_drbg);
 
-    ra_tls_verify_callback_der_f      = NULL;
+    // ra_tls_verify_callback_der_f      = NULL;
 
 #if defined(MBEDTLS_DEBUG_C)
     mbedtls_debug_set_threshold(DEBUG_LEVEL);
@@ -819,10 +831,6 @@ int pass_policy_data(const char* data, const char* verification_result){
     buffer = (char *)malloc(strlen(data)+1);
     memset(buffer,0,strlen(data)+1);
     strcpy(buffer, data);
-
-    buffer1 = (char *)malloc(strlen(verification_result)+1);
-    memset(buffer1,0,strlen(verification_result)+1);
-    strcpy(buffer1, verification_result);
    
     int ret;
     size_t len;
@@ -835,34 +843,45 @@ int pass_policy_data(const char* data, const char* verification_result){
     while ((ret = mbedtls_ssl_write(&ssl, (unsigned char *)buffer, len)) <= 0) {
         if (ret == MBEDTLS_ERR_NET_CONN_RESET) {
             mbedtls_printf(" failed\n  ! peer closed the connection\n\n");
+            free(buffer);
             goto reset;
         }
 
         if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE) {
             mbedtls_printf(" failed\n  ! mbedtls_ssl_write returned %d\n\n", ret);
+            free(buffer);
             goto exit;
         }
     }
     len = ret;
     mbedtls_printf(" %lu bytes written\n\n%s\n", len, (char*)buffer);
+    free(buffer);
 
     mbedtls_printf("  > Write result to rpe:");
     fflush(stdout);
+
     /* Write result to rpe */
+    buffer1 = (char *)malloc(strlen(verification_result)+1);
+    memset(buffer1,0,strlen(verification_result)+1);
+    strcpy(buffer1, verification_result);
+    
     len = strlen(buffer1);
     while ((ret = mbedtls_ssl_write(&ssl, (unsigned char *)buffer1, len)) <= 0) {
         if (ret == MBEDTLS_ERR_NET_CONN_RESET) {
             mbedtls_printf(" failed\n  ! peer closed the connection\n\n");
+            free(buffer1);
             goto reset;
         }
 
         if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE) {
             mbedtls_printf(" failed\n  ! mbedtls_ssl_write returned %d\n\n", ret);
+            free(buffer1);
             goto exit;
         }
     }
     len = ret;
     mbedtls_printf(" %lu bytes written\n\n%s\n", len, (char*)buffer1);
+    free(buffer1);
 
     mbedtls_printf("  . Closing the connection...");
 
@@ -887,8 +906,7 @@ reset:
         mbedtls_printf("Last error was: %d - %s\n\n", ret, error_buf);
     }
 #endif
-    free(buffer);
-    free(buffer1);
+    
     mbedtls_net_free(&client_fd);
 
     mbedtls_ssl_session_reset(&ssl);

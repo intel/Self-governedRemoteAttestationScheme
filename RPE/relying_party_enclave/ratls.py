@@ -40,7 +40,7 @@ class RATLS:
         RAtls.init_pubkeys.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
         #RAtlsclient.init_pubkeys.restype = ctypes.c_char_p
 
-        RAtls.init_pubkeys(ctypes.c_char_p(signing_key), ctypes.c_char_p(encryption_keys))
+        return RAtls.init_pubkeys(ctypes.c_char_p(signing_key), ctypes.c_char_p(encryption_keys))
     
     def client(self, address, port):
         try:

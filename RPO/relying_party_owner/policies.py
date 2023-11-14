@@ -23,11 +23,11 @@ class Policies:
             self.policies_data_json = json.loads(data)
 
         except Exception as e:
-            raise
             logger.error(
-                "Unable to retrieve worker information from %(url)s."
+                "Load policies.json error"
                 " Error message %(message)" % 
-                { "url": url, "message": str(e) })
+                { "message": str(e) })
+            raise
             
         return json.dumps(self.policies_data_json)
             

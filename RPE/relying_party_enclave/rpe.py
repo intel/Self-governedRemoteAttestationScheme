@@ -61,7 +61,9 @@ class RPE:
         
         # =============== Phase one ===============
         logger.info("======================= Starting phase one... =======================")
-        self.ratls.initpublickeys(self.signing_keys["public"].to_pem(), self.encryption_keys["public"].export_key("PEM"))
+        if not self.ratls.initpublickeys(self.signing_keys["public"].to_pem(), self.encryption_keys["public"].export_key("PEM")):
+            logger.error("Failed to init public keys")
+            return
         # RA-TLS to RPO
         success = self.ratls.client(self.rpo_address, self.rpo_port)
         

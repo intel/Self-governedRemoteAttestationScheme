@@ -24,10 +24,6 @@ int teeVerifyQuote(std::string base64_encoded_quote, size_t quote_size, std::str
 
     memset(&supp_data, 0, sizeof(tee_supp_data_descriptor_t));
 
-    // Parse collateral
-    uint8_t* p_quote_collateral = parseCollateral(base64_encoded_collateral);
-    std::cout << "Parse collateral finished" << std::endl;
-
     std::vector<uint8_t> quote = base64_decode(base64_encoded_quote);
     quote_size = quote.size();
 
@@ -67,6 +63,10 @@ int teeVerifyQuote(std::string base64_encoded_quote, size_t quote_size, std::str
     time_t current_time = time(NULL);
     uint32_t collateral_expiration_status  = 1;
     sgx_ql_qv_result_t verification_result = SGX_QL_QV_RESULT_UNSPECIFIED;
+
+    // Parse collateral
+    uint8_t* p_quote_collateral = parseCollateral(std::move(base64_encoded_collateral));
+    std::cout << "Parse collateral finished" << std::endl;
 
     /* call into libsgx_dcap_quoteverify to verify ECDSA-based SGX quote */
     ret = tee_verify_quote(
@@ -121,7 +121,7 @@ int sgxVerifyQuote(std::string base64_encoded_quote, size_t quote_size, std::str
         return ret;
     }
     // Parse collateral
-    uint8_t* p_quote_collateral = parseCollateral(base64_encoded_collateral);
+    uint8_t* p_quote_collateral = parseCollateral(std::move(base64_encoded_collateral));
     std::cout << "Parse collateral finished" << std::endl;
     sgx_ql_qve_collateral_t* p_quote_collateral_struct = reinterpret_cast<sgx_ql_qve_collateral_t*>(p_quote_collateral);
     
@@ -200,12 +200,12 @@ int sgxVerifyQuoteBody(std::string base64_encoded_quote, std::string rpe_policie
     std::vector<uint8_t> quote = base64_decode(base64_encoded_quote);
     sgx_quote3_t* p_quote = reinterpret_cast<sgx_quote3_t*>(quote.data());
 
-    bool validate_mrenclave   = true;
-    bool validate_mrsigner    = true;
-    bool validate_isv_prod_id = true;
-    bool validate_isv_svn     = true;
-    bool validate_report_data = true;
-    bool validate_qeid        = true;
+    const bool validate_mrenclave   = true;
+    const bool validate_mrsigner    = true;
+    const bool validate_isv_prod_id = true;
+    const bool validate_isv_svn     = true;
+    const bool validate_report_data = true;
+    const bool validate_qeid        = true;
 
     // Compare policies
     int ret = sgx_verify_quote_body(p_quote, validate_mrenclave ? mr_enclave : NULL,
@@ -319,10 +319,10 @@ int tdxVerifyQuoteBody(std::string base64_encoded_quote, std::string tdx_policie
     std::vector<uint8_t> quote = base64_decode(base64_encoded_quote);
     sgx_quote4_t* p_quote = reinterpret_cast<sgx_quote4_t*>(quote.data());
 
-    bool validate_mrtd        = true;
-    bool validate_mrsigner    = false;
-    bool validate_report_data = true;
-    bool validate_qeid        = false;
+    const bool validate_mrtd        = true;
+    const bool validate_mrsigner    = false;
+    const bool validate_report_data = true;
+    const bool validate_qeid        = false;
 
     // Compare policies
     int ret = tdx_verify_quote_body(p_quote, validate_mrtd ? mr_td : NULL,

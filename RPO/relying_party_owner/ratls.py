@@ -43,16 +43,13 @@ class RATLS:
             result = RAtlsserver.ra_tls_server_init(ctypes.c_char_p(b_port))
 
             return result
-          
-            logger.info(os.listdir())
-          
-
+        
         except Exception as e:
-            raise
             logger.error(
-                "Unable to retrieve worker information from %(url)s."
+                "Server_init error"
                 " Error message %(message)" % 
-                { "url": url, "message": str(e) })
+                { "message": str(e) })
+            raise
 
     def getRPEPublicKeys(self):
         RAtlsserver.get_public_keys.argtypes = []

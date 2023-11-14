@@ -17,7 +17,7 @@ class RPO:
         conf = self.conf["rpo"]
         self.policies_path = conf["policies_path"]
         self.private_key_path = conf["private_key_path"]
-        self.evience_path = conf["evidence_path"]
+        self.evidence_path = conf["evidence_path"]
         self.policies = policies.Policies()
         self.ratls = ratls.RATLS()
 
@@ -126,7 +126,7 @@ class RPO:
         
         # Write evidences to file
         try:
-            with open(self.evience_path, 'wb') as fd:
+            with open(self.evidence_path, 'wb') as fd:
                 fd.write(verification_result_bytes)
         except Exception as e:
             logger.error(
