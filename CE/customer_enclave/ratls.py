@@ -48,13 +48,11 @@ class RATLS:
             return True
 
         except Exception as e:
-            raise
             logger.error(
-                "Unable to retrieve worker information from %(url)s."
+                "Send keys to RPE error"
                 " Error message %(message)" % 
-                { "url": url, "message": str(e) })
-            
-        return True
+                {"message": str(e) })
+            raise
             
     def getCounterpartKeys(self):
         return self.data

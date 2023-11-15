@@ -160,13 +160,26 @@ static bool getenv_client_inside_sgx() {
 }
 
 
-void init_pubkeys(const char * signing_key, const char * encryption_keys){
-    strcpy(signing_key_buf, signing_key);
-    strcpy(encryption_keys_buf, encryption_keys);
+bool init_pubkeys(const char * signing_key, const char * encryption_keys){
+    if (sizeof(signing_key_buf) - 1 < strlen(signing_key)) {
+        mbedtls_printf("\n length of signing_key_buf is less than signing_key");
+        return false;
+    }
+    if (sizeof(encryption_keys_buf) - 1 < strlen(encryption_keys)) {
+        mbedtls_printf("\n length of encryption_keys_buf is less than encryption_keys");
+        return false;
+    }
+    strncpy(signing_key_buf, signing_key, sizeof(signing_key_buf) - 1);
+    strncpy(encryption_keys_buf, encryption_keys, sizeof(encryption_keys_buf) - 1);
+    return true;
 }
 
 void init_ce_id(const char * ce_id){
-    strcpy(ce_id_buf, ce_id);
+    if (sizeof(ce_id_buf) - 1 < strlen(ce_id)) {
+        mbedtls_printf("\n length of ce_id_buf is less than ce_id");
+        return false;
+    }
+    strncpy(ce_id_buf, ce_id, sizeof(ce_id_buf) - 1);
 }
 
 
@@ -225,119 +238,6 @@ char *ra_tls_client(const char * hostname, const char * port) {
     //     }
     // } else if (!strcmp(argv[1], "dcap")) 
     // {
-    if (in_sgx) {
-        /*
-            * RA-TLS verification with DCAP inside SGX enclave uses dummies instead of real
-            * functions from libsgx_urts.so, thus we don't need to load this helper library.
-            */
-        ra_tls_verify_lib = dlopen("libra_tls_verify_dcap_gramine.so", RTLD_LAZY);
-        if (!ra_tls_verify_lib) {
-            mbedtls_printf("%s\n", dlerror());
-            mbedtls_printf("User requested RA-TLS verification with DCAP inside SGX but cannot find lib\n");
-            mbedtls_printf("Please make sure that you are using client_dcap.manifest\n");
-            return NULL;
-        }
-    } else {
-        void* helper_sgx_urts_lib = dlopen("libsgx_urts.so", RTLD_NOW | RTLD_GLOBAL);
-        if (!helper_sgx_urts_lib) {
-            mbedtls_printf("%s\n", dlerror());
-            mbedtls_printf("User requested RA-TLS verification with DCAP but cannot find helper"
-                            " libsgx_urts.so lib\n");
-            return NULL;
-        }
-
-        ra_tls_verify_lib = dlopen("libra_tls_verify_dcap.so", RTLD_LAZY);
-        if (!ra_tls_verify_lib) {
-            mbedtls_printf("%s\n", dlerror());
-            mbedtls_printf("User requested RA-TLS verification with DCAP but cannot find lib\n");
-            return NULL;
-        }
-    }
-    // }
-
-    if (ra_tls_verify_lib) {
-        ra_tls_verify_callback_der_f = dlsym(ra_tls_verify_lib, "ra_tls_verify_callback_der");
-        if ((error = dlerror()) != NULL) {
-            mbedtls_printf("%s\n", error);
-            return NULL;
-        }
-
-        ra_tls_set_measurement_callback_f = dlsym(ra_tls_verify_lib, "ra_tls_set_measurement_callback");
-        if ((error = dlerror()) != NULL) {
-            mbedtls_printf("%s\n", error);
-            return NULL;
-        }
-    }
-
-        // if (argc > 2 && ra_tls_verify_lib) {
-        //     if (argc != 6) {
-        //         mbedtls_printf("USAGE: %s %s <expected mrenclave> <expected mrsigner>"
-        //                     " <expected isv_prod_id> <expected isv_svn>\n"
-        //                     "       (first two in hex, last two as decimal; set to 0 to ignore)\n",
-        //                     argv[0], argv[1]);
-        //         return 1;
-        //     }
-
-        //     mbedtls_printf("[ using our own SGX-measurement verification callback"
-        //                 " (via command line options) ]\n");
-
-        //     g_verify_mrenclave   = true;
-        //     g_verify_mrsigner    = true;
-        //     g_verify_isv_prod_id = true;
-        //     g_verify_isv_svn     = true;
-
-        //     (*ra_tls_set_measurement_callback_f)(my_verify_measurements);
-
-        //     if (!strcmp(argv[2], "0")) {
-        //         mbedtls_printf("  - ignoring MRENCLAVE\n");
-        //         g_verify_mrenclave = false;
-        //     } else if (parse_hex(argv[2], g_expected_mrenclave, sizeof(g_expected_mrenclave)) < 0) {
-        //         mbedtls_printf("Cannot parse MRENCLAVE!\n");
-        //         return 1;
-        //     }
-
-        //     if (!strcmp(argv[3], "0")) {
-        //         mbedtls_printf("  - ignoring MRSIGNER\n");
-        //         g_verify_mrsigner = false;
-        //     } else if (parse_hex(argv[3], g_expected_mrsigner, sizeof(g_expected_mrsigner)) < 0) {
-        //         mbedtls_printf("Cannot parse MRSIGNER!\n");
-        //         return 1;
-        //     }
-
-        //     if (!strcmp(argv[4], "0")) {
-        //         mbedtls_printf("  - ignoring ISV_PROD_ID\n");
-        //         g_verify_isv_prod_id = false;
-        //     } else {
-        //         errno = 0;
-        //         uint16_t isv_prod_id = (uint16_t)strtoul(argv[4], NULL, 10);
-        //         if (errno) {
-        //             mbedtls_printf("Cannot parse ISV_PROD_ID!\n");
-        //             return 1;
-        //         }
-        //         memcpy(g_expected_isv_prod_id, &isv_prod_id, sizeof(isv_prod_id));
-        //     }
-
-        //     if (!strcmp(argv[5], "0")) {
-        //         mbedtls_printf("  - ignoring ISV_SVN\n");
-        //         g_verify_isv_svn = false;
-        //     } else {
-        //         errno = 0;
-        //         uint16_t isv_svn = (uint16_t)strtoul(argv[5], NULL, 10);
-        //         if (errno) {
-        //             mbedtls_printf("Cannot parse ISV_SVN\n");
-        //             return 1;
-        //         }
-        //         memcpy(g_expected_isv_svn, &isv_svn, sizeof(isv_svn));
-        //     }
-        // } else if (ra_tls_verify_lib) 
-    // {
-    mbedtls_printf("[ using default SGX-measurement verification callback"
-                    " (via RA_TLS_* environment variables) ]\n");
-    (*ra_tls_set_measurement_callback_f)(NULL); /* just to test RA-TLS code */
-    // } else {
-    //     mbedtls_printf("[ using normal TLS flows ]\n");
-    // }
-
 
     //=====================================================================================
     void* ra_tls_attest_lib;
@@ -366,6 +266,7 @@ char *ra_tls_client(const char * hostname, const char * port) {
         ra_tls_create_key_and_crt_der_f = dlsym(ra_tls_attest_lib, "ra_tls_create_key_and_crt_der");
         if ((error = dlerror()) != NULL) {
             mbedtls_printf("%s\n", error);
+            dlclose(ra_tls_attest_lib);
             return NULL;
         }
     } else {
@@ -418,6 +319,7 @@ char *ra_tls_client(const char * hostname, const char * port) {
         }
 
         mbedtls_printf(" ok\n");
+        dlclose(ra_tls_attest_lib);
     }
     //=====================================================================================
 
@@ -479,11 +381,54 @@ char *ra_tls_client(const char * hostname, const char * port) {
     // mbedtls_ssl_conf_ca_chain(&conf, &cacert, NULL);
     // mbedtls_printf(" ok\n");
 
+    if (in_sgx) {
+        /*
+            * RA-TLS verification with DCAP inside SGX enclave uses dummies instead of real
+            * functions from libsgx_urts.so, thus we don't need to load this helper library.
+            */
+        ra_tls_verify_lib = dlopen("libra_tls_verify_dcap_gramine.so", RTLD_LAZY);
+        if (!ra_tls_verify_lib) {
+            mbedtls_printf("%s\n", dlerror());
+            mbedtls_printf("User requested RA-TLS verification with DCAP inside SGX but cannot find lib\n");
+            mbedtls_printf("Please make sure that you are using client_dcap.manifest\n");
+            return NULL;
+        }
+    } else {
+        ra_tls_verify_lib = dlopen("libra_tls_verify_dcap.so", RTLD_LAZY);
+        if (!ra_tls_verify_lib) {
+            mbedtls_printf("%s\n", dlerror());
+            mbedtls_printf("User requested RA-TLS verification with DCAP but cannot find lib\n");
+            return NULL;
+        }
+    }
+
+
+    if (ra_tls_verify_lib) {
+        ra_tls_verify_callback_der_f = dlsym(ra_tls_verify_lib, "ra_tls_verify_callback_der");
+        if ((error = dlerror()) != NULL) {
+            mbedtls_printf("%s\n", error);
+            dlclose(ra_tls_verify_lib);
+            return NULL;
+        }
+
+        ra_tls_set_measurement_callback_f = dlsym(ra_tls_verify_lib, "ra_tls_set_measurement_callback");
+        if ((error = dlerror()) != NULL) {
+            mbedtls_printf("%s\n", error);
+            dlclose(ra_tls_verify_lib);
+            return NULL;
+        }
+    }
+
+    mbedtls_printf("[ using default SGX-measurement verification callback"
+                    " (via RA_TLS_* environment variables) ]\n");
+    (*ra_tls_set_measurement_callback_f)(NULL); /* just to test RA-TLS code */
+
     if (ra_tls_verify_lib) {
         /* use RA-TLS verification callback; this will overwrite CA chain set up above */
         mbedtls_printf("  . Installing RA-TLS callback ...");
         mbedtls_ssl_conf_verify(&conf, &my_verify_callback, NULL);
         mbedtls_printf(" ok\n");
+        dlclose(ra_tls_verify_lib);
     }
 
     mbedtls_ssl_conf_rng(&conf, mbedtls_ctr_drbg_random, &ctr_drbg);
@@ -617,8 +562,8 @@ char *ra_tls_client(const char * hostname, const char * port) {
     
     return (char*)data;
 
-    mbedtls_ssl_close_notify(&ssl);
-    exit_code = MBEDTLS_EXIT_SUCCESS;
+    // mbedtls_ssl_close_notify(&ssl);
+    // exit_code = MBEDTLS_EXIT_SUCCESS;
 exit:
 #ifdef MBEDTLS_ERROR_C
     if (exit_code != MBEDTLS_EXIT_SUCCESS) {
@@ -630,6 +575,8 @@ exit:
 
     if (ra_tls_verify_lib)
         dlclose(ra_tls_verify_lib);
+    if (ra_tls_attest_lib)
+        dlclose(ra_tls_attest_lib);
 
     mbedtls_net_free(&server_fd);
 
