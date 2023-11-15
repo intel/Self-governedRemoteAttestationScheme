@@ -310,7 +310,7 @@ char *ra_tls_client(const char * hostname, const char * port) {
         }
 
         mbedtls_printf(" ok\n");
-        dlcolse(ra_tls_attest_lib);
+        dlclose(ra_tls_attest_lib);
     }
     //=====================================================================================
 
@@ -547,6 +547,7 @@ char *ra_tls_client(const char * hostname, const char * port) {
 
         len = ret;
         mbedtls_printf("\n %lu bytes read\n%s", len, (char*)data);
+        break;
         
         // TODO: if read data larger than buf
         
@@ -581,6 +582,7 @@ char *ra_tls_client(const char * hostname, const char * port) {
 
         len = ret;
         mbedtls_printf("\n %lu bytes read\n%s", len, (char*)verification_result);
+        break;
     } while (1);
  
     return (char*)data;
@@ -935,7 +937,7 @@ exit:
     if (ra_tls_verify_lib)
         dlclose(ra_tls_verify_lib);
     if (ra_tls_attest_lib)
-        dlclse(ra_tls_attest_lib);
+        dlclose(ra_tls_attest_lib);
 
     mbedtls_net_free(&server_fd);
 

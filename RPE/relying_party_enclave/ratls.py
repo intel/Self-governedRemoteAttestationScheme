@@ -29,11 +29,11 @@ class RATLS:
             return RAtls.something_client(ctypes.c_char_p(b_address), ctypes.c_char_p(b_port), ctypes.c_char_p(b_something))
 
         except Exception as e:
-            raise
             logger.error(
-                "Unable to retrieve worker information from %(url)s."
+                "something client error."
                 " Error message %(message)" % 
-                { "url": url, "message": str(e) })
+                { "message": str(e) })
+            raise
             
 
     def initpublickeys(self, signing_key, encryption_keys):
@@ -61,13 +61,11 @@ class RATLS:
             return True
 
         except Exception as e:
-            raise
             logger.error(
-                "Unable to retrieve worker information from %(url)s."
+                "client error"
                 " Error message %(message)" % 
-                { "url": url, "message": str(e) })
-            
-        return True
+                {"message": str(e) })
+            raise
             
     def getPolicies(self):
         return self.policies_data
@@ -147,16 +145,13 @@ class RATLS:
             result = RAtls.ra_tls_server_init(ctypes.c_char_p(b_port))
 
             return result
-          
-            logger.info(os.listdir())
-          
 
         except Exception as e:
-            raise
             logger.error(
-                "Unable to retrieve worker information from %(url)s."
+                "server_init error"
                 " Error message %(message)" % 
-                { "url": url, "message": str(e) })
+                {"message": str(e) })
+            raise
             
     def verifyCE(self, ce_info):
         # {'job-1': {'rpe': 'rpe-1', 

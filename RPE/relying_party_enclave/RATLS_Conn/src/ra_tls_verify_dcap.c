@@ -249,28 +249,6 @@ out:
     if (p_quote_collaterals) {
         for(int i = 0;i < collateral_num;++i) {
             if (p_quote_collaterals[i]) {
-                sgx_ql_qve_collateral_t* p_quote_collateral = (sgx_ql_qve_collateral_t*)p_quote_collaterals[i];
-                if (p_quote_collateral->pck_crl_issuer_chain) {
-                    free(p_quote_collateral->pck_crl_issuer_chain);
-                }
-                if (p_quote_collateral->pck_crl) {
-                    free(p_quote_collateral->pck_crl);
-                }
-                if (p_quote_collateral->qe_identity) {
-                    free(p_quote_collateral->qe_identity);
-                }
-                if (p_quote_collateral->qe_identity_issuer_chain) {
-                    free(p_quote_collateral->qe_identity_issuer_chain);
-                }
-                if (p_quote_collateral->root_ca_crl) {
-                    free(p_quote_collateral->root_ca_crl);
-                }
-                if (p_quote_collateral->tcb_info) {
-                    free(p_quote_collateral->tcb_info);
-                }
-                if (p_quote_collateral->tcb_info_issuer_chain) {
-                    free(p_quote_collateral->tcb_info_issuer_chain);
-                }
                 freeCollateral(p_quote_collaterals[i]);
             }
         }
@@ -508,13 +486,26 @@ int base64Decode(const char* input, unsigned char* output, int size) {
 }
 
 void freeCollateral(uint8_t* p_quote_collateral) {
-    sgx_ql_qve_collateral_t* p_quote_collateral_struct = (sgx_ql_qve_collateral_t*)(p_quote_collateral);
-    free(p_quote_collateral_struct->pck_crl_issuer_chain);
-    free(p_quote_collateral_struct->root_ca_crl);
-    free(p_quote_collateral_struct->pck_crl);
-    free(p_quote_collateral_struct->tcb_info_issuer_chain);
-    free(p_quote_collateral_struct->tcb_info);
-    free(p_quote_collateral_struct->qe_identity_issuer_chain);
-    free(p_quote_collateral_struct->qe_identity);
-    free(p_quote_collateral_struct);
+    sgx_ql_qve_collateral_t* p_quote_collateral_struct = (sgx_ql_qve_collateral_t*)p_quote_collateral;
+    if (p_quote_collateral_struct->pck_crl_issuer_chain) {
+        free(p_quote_collateral_struct->pck_crl_issuer_chain);
+    }
+    if (p_quote_collateral_struct->pck_crl) {
+        free(p_quote_collateral_struct->pck_crl);
+    }
+    if (p_quote_collateral_struct->qe_identity) {
+        free(p_quote_collateral_struct->qe_identity);
+    }
+    if (p_quote_collateral_struct->qe_identity_issuer_chain) {
+        free(p_quote_collateral_struct->qe_identity_issuer_chain);
+    }
+    if (p_quote_collateral_struct->root_ca_crl) {
+        free(p_quote_collateral_struct->root_ca_crl);
+    }
+    if (p_quote_collateral_struct->tcb_info) {
+        free(p_quote_collateral_struct->tcb_info);
+    }
+    if (p_quote_collateral_struct->tcb_info_issuer_chain) {
+        free(p_quote_collateral_struct->tcb_info_issuer_chain);
+    }
 }

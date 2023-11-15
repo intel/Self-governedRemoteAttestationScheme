@@ -191,16 +191,16 @@ static int verify_RPE_qeid() {
     char *s = strdup(rpe_qeids);
     if (s == NULL) {
         mbedtls_printf("verify_RPE_qeid failed !: strdup for rpe_qeids error\n");
-        free(s);
         return -1;
     }
+    char* s1 = s;
     for (token = strsep(&s, " "); token != NULL; token = strsep(&s, " ")){  
         if(strcmp(hexqeid, token)==0) {
-            free(s);
+            free(s1);
             return 1;
         }
     }
-    free(s);
+    free(s1);
     return -1;
 }
 
